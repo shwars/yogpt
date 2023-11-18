@@ -81,7 +81,9 @@ def main():
     else:
         trans = lambda x : x
         
-    if args.query==['-']:
+    is_pipe = not os.isatty(sys.stdin.fileno())
+
+    if args.query==['-'] or (args.query==[] and is_pipe):
         print(model([HumanMessage(content=trans(sys.stdin.read()))]).content)
         exit(0)
     elif len(args.query)>0:
