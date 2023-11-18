@@ -38,7 +38,7 @@ def find_template(tlist,tname):
 class ABot:
     def __init__(self,base_model,system_message=None):
         self.GPT = base_model
-        self.history = [SystemMessage(content=system_message)]
+        self.history = [SystemMessage(content=system_message)] if system_message else []
 
     def __call__(self, message):
         self.history.append(HumanMessage(content=message))
@@ -78,7 +78,6 @@ def main():
     else:
         trans = lambda x : x
         
-
     if args.query==['-']:
         print(model([HumanMessage(content=trans(sys.stdin.read()))]).content)
         exit(0)
@@ -86,7 +85,12 @@ def main():
         print(model([HumanMessage(content=trans(' '.join(args.query)))]).content)
         exit(0)
     else:
-        pass
+        bot = ABot(model)
+        while True:
+            print(" U> ",end='')
+            q = input()
+            a = bot(q)
+            print(f"AI> {a}")
 
 if __name__ == '__main__':
     main()
