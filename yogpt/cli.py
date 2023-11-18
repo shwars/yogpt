@@ -3,6 +3,7 @@ import os
 import json
 from langchain.schema import HumanMessage, SystemMessage, AIMessage
 import sys
+from yogpt.g4f import G4FModel
 
 parser = argparse.ArgumentParser(description='yogpt: LLM command-line interface')
 parser.add_argument('--model','-m', type=str, default=None, help='model name')
@@ -15,16 +16,18 @@ parser.add_argument('query', nargs=argparse.REMAINDER)
 
 def load_model(modlist,model_name):
     if modlist is None:
-        return None
+        return G4FModel()
     model = None
     for m in modlist:
         if (m['name'] == model_name) or (model_name is None and m.get('default',False)):
             model = m
     if model is None:
         return None
-    mod = __import__(model['namespace'])
-    clss = getattr(mod.chat_models,model['classname'])
-    obj = clss(**model['params'])    
+    mpath = model['classname'].split('.')
+    mod = __import__('.'.join(mpath[:-1]))
+    for x in mpath[1:]:
+        mod = getattr(mod,x)
+    obj = mod(**model['params'])    
     return obj
 
 def find_template(tlist,tname):

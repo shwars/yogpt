@@ -47,16 +47,14 @@ Each model is defined by the following JSON snippet:
 ```json
 {
     "name" : "ygpt",
-    "namespace" : "langchain.chat_models",
-    "classname" : "ChatYandexGPT",
+    "classname" : "langchain.chat_models.ChatYandexGPT",
     "default" : true,
     "params" : { "api_key" : "..." }
 }
 ```
 Here parameters mean the following:
 * `name` is the model name, which you can specify using `-m` or `--model` parameter of the utility
-* `namespace` is the namespace of the model class, in most cases it will be LangChain namespace `langchain.chat_models`
-* `classname` is the class name of the chat model
+* `classname` is the full class name of the model class
 * `params` is the dictionary with all the parameters that we pass to the class when creating the model. Depending on the model, there will probably be your personal credentials here, such as OpenAI API Key.
 
 ### Templates

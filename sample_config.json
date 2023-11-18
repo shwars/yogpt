@@ -2,15 +2,13 @@
  "models" : [
    {
      "name" : "ygpt",
-     "namespace" : "langchain.chat_models",
-     "classname" : "ChatYandexGPT",
+     "classname" : "langchain.chat_models.ChatYandexGPT",
      "default" : true,
      "params" : { "api_key" : "..." }
    },
    {
      "name" : "gc",
-     "namespace" : "langchain.chat_models",
-     "classname" : "GigaChat",
+     "classname" : "langchain.chat_models.GigaChat",
      "params" : { "credentials" : "...", "verify_ssl_certs" : false }
    }
   ],
