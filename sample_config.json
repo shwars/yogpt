@@ -1,0 +1,31 @@
+{
+ "models" : [
+   {
+     "name" : "ygpt",
+     "namespace" : "langchain.chat_models",
+     "classname" : "ChatYandexGPT",
+     "default" : true,
+     "params" : { "api_key" : "..." }
+   },
+   {
+     "name" : "gc",
+     "namespace" : "langchain.chat_models",
+     "classname" : "GigaChat",
+     "params" : { "credentials" : "...", "verify_ssl_certs" : false }
+   }
+  ],
+  "templates" : [
+    {
+      "name" : "translate",
+      "template" : "Please, translate the text in triple backquotes below into the following language: {param_1}. Here is the text:\n```{}```"
+    },
+    {
+      "name" : "summarize",
+      "template" : "Please, summarize the text in triple backquotes below:\n```{}```"
+    },
+    {
+      "name" : "expand",
+      "template" : "Please, rewrite the text in triple backquotes below in the longest possible form:\n```{}```"
+    }
+  ]
+}
