@@ -1,7 +1,7 @@
 {
  "models" : [
    {
-     "name" : "ygpt",
+     "name" : "yagpt",
      "classname" : "langchain.chat_models.ChatYandexGPT",
      "default" : true,
      "params" : { "api_key" : "..." }
@@ -24,6 +24,12 @@
     {
       "name" : "expand",
       "template" : "Please, rewrite the text in triple backquotes below in the longest possible form:\n```{}```"
+    }
+  ],
+  "system_messages" : [
+    {
+      "name" : "rude",
+      "message" : "You are extremely rude chatbot that does not want to talk to anyone."
     }
   ]
 }
