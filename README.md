@@ -1,111 +1,256 @@
 # yogpt: Command-Line GPT Utility
 
-This utility has been created to provide support for all chat large language models supported by LangChain framework. You can install it by using
+`yogpt` is a small command-line utility for simple LLM calls from the shell.
+It uses the OpenAI-compatible Responses API, so the same command can work with
+OpenAI, Yandex AI Studio, or another provider that follows the same API shape.
 
 ```bash
 pip install yogpt
 ```
 
-After this, you can invoke it just by calling `yogpt`:
+After installation:
 
 ```bash
 yogpt Hello, how are you today?
 ```
 
-## Sample usage
+## Common usage
 
-There are four main scenarios how `yogpt` is normally used:
+Ask a question directly:
 
-* By asking the question directly on the command line `yogpt What is the 10th digit of Pi?`
-* By piping stdin into `yogpt`: `echo What is the 10th digit of Pi | yogpt -`. If `yogpt` understands that it is invoked in the pipe, it will automatically assume `-` parameter, so it can be omitted.
-* By calling `yogpt` without input - this initiates console chat.
-* If you want to further chat with `yogpt` after providing it with some input, you may specify `-c`/`--chat` flag. In this case it will consume input as first utterance to the bot, and then initiate a follow-up chat. For example:
-
-```
-yogpt -s "You are a software expert. Please read python program provided and be ready to answer questions on this program." -c @program.py
+```bash
+yogpt What is the 10th digit of Pi?
 ```
 
-The example above also shows that you can use `@filename` syntax to get input from a file.
+Pipe stdin into the model:
 
-You can specify different models using `-m`/`--model` parameter. Possible models (including your personal credentials) should be specified in the config file (see details below).
+```bash
+echo What is the 10th digit of Pi? | yogpt -
+```
 
-You can also use prompt templates. Here is an example that will explain what a Python program does:
+If `yogpt` sees piped stdin and no explicit query, it reads stdin automatically:
+
+```bash
+cat notes.txt | yogpt -p summarize
+```
+
+Read input from a file with `@filename`:
+
+```bash
+yogpt @program.py
+```
+
+Start an interactive chat:
+
+```bash
+yogpt
+```
+
+Continue chatting after an initial prompt:
+
+```bash
+yogpt -s "You are a software expert. Read this Python program and answer follow-up questions." -c @program.py
+```
+
+Select a configured model:
+
+```bash
+yogpt -m qwen Explain why sky is blue
+```
+
+Set temperature:
+
+```bash
+yogpt -t 0.2 Write a short commit message for this change
+```
+
+## Templates
+
+Use an inline template. The `{}` placeholder is replaced with the input:
 
 ```bash
 cat program.py | yogpt -p "Please explain what the following Python code does:{}"
 ```
 
-Some prompt templates that you often use can be defined in the config file, and used just by specifying the template name (with some optional additional parameters):
+Use a named template from `.yogpt.config.json`:
 
 ```bash
-cat english.txt | yogpt -p translate -1 german -
+cat english.txt | yogpt -p translate -1 German -
 ```
 
-You can also use `@filename` syntax to get prompt template from a filename.
+Templates can use `{param_1}`, `{param_2}`, and `{param_3}`, supplied by `-1`,
+`-2`, and `-3`.
 
-You can specify system message using `-s`/`--system` switch. Similarly, it can be a name from config file, `@filename`, or verbatim system message in quotes.
+You can also load a template from a file:
 
-## Specifying credentials
+```bash
+yogpt -p @prompt.txt @input.txt
+```
 
-All utility configuration is stored in the user's home directory in the `.yogpt.config.json` file. A sample config file is provided in this repository, which you may use as a starting point.
+## System messages
 
-Config file specifies the following sections:
+Use a system message directly:
+
+```bash
+yogpt -s "You are a concise technical assistant." Explain DNS
+```
+
+Use a named system message from the config:
+
+```bash
+yogpt -s expert @proposal.md
+```
+
+Use a system message from a file:
+
+```bash
+yogpt -s @system.txt @input.txt
+```
+
+## Images
+
+Attach one or more image files with `--image`:
+
+```bash
+yogpt --image screenshot.png "Describe what is wrong in this UI"
+yogpt --image before.png --image after.png "Compare these two images"
+```
+
+Images are sent as Responses API `input_image` items using base64 data URLs.
+
+## Web search
+
+Enable the Responses API web search tool:
+
+```bash
+yogpt --web "What changed in Python recently?"
+```
+
+Control search context size:
+
+```bash
+yogpt --web --web-detail low "Give a short current answer"
+yogpt --web --web-detail hi "Give a detailed current answer with context"
+```
+
+`--web-detail med` is the default and maps to the API value `medium`.
+
+## Code Interpreter
+
+Enable Code Interpreter with `--code`:
+
+```bash
+yogpt --code "Create a CSV with the numbers 1 to 10 and their squares"
+```
+
+If the model creates files, `yogpt` downloads them into the current directory.
+Use `--output-dir` to choose another location:
+
+```bash
+yogpt --code --output-dir outputs "Create a line chart as a PNG"
+```
+
+Generated files are discovered from Code Interpreter output and file citation
+annotations. `yogpt` first uses the OpenAI client container file APIs and then
+falls back to the regular Files API when needed.
+
+## Streaming
+
+By default, `yogpt` waits for the full response and prints it at once. Use
+`--stream` to display text as it is generated:
+
+```bash
+yogpt --stream "Write a short story about a command-line tool"
+```
+
+## Configuration
+
+Configuration is read from `~/.yogpt.config.json`. For tests or temporary
+setups, set `YOGPT_CONFIG` to another JSON file path.
+
+A minimal model entry looks like this:
+
+```json
+{
+  "name": "gpt",
+  "model_name": "gpt-5.5",
+  "base_url": "https://api.openai.com/v1",
+  "api_key": "%OPENAI_API_KEY%",
+  "default": true,
+  "params": {
+    "reasoning": { "effort": "none" }
+  }
+}
+```
+
+Fields:
+
+* `name`: short model name used with `-m` or `--model`
+* `model_name`: model identifier sent to the Responses API
+* `base_url`: provider endpoint, defaulting to `https://api.openai.com/v1`
+* `api_key`: provider API key
+* `project`: optional project or folder ID for providers that need it
+* `default`: optional default model marker
+* `params`: optional extra fields passed to `responses.create`
+
+Environment variables can be used anywhere in the config with `%NAME%` syntax.
+For example, Yandex AI Studio model names usually include the folder ID:
+
+```json
+{
+  "name": "qwen",
+  "model_name": "gpt://%folder_id%/qwen3.5-35b-a3b-fp8",
+  "base_url": "https://ai.api.cloud.yandex.net/v1",
+  "api_key": "%api_key%",
+  "project": "%folder_id%"
+}
+```
+
+See `sample_config.json` for a fuller starting point with OpenAI and Yandex AI
+Studio models, templates, and system messages.
+
+## Config sections
 
 ### Models
 
-Each model is defined by the following JSON snippet:
+The `models` array defines available command-line model aliases:
 
 ```json
-{
-    "name" : "ygpt",
-    "classname" : "langchain.chat_models.ChatYandexGPT",
-    "default" : true,
-    "params" : { "api_key" : "..." }
-}
+"models": [
+  {
+    "name": "gpt",
+    "model_name": "gpt-5.5",
+    "base_url": "https://api.openai.com/v1",
+    "api_key": "%OPENAI_API_KEY%",
+    "default": true
+  }
+]
 ```
-Here parameters mean the following:
-* `name` is the model name, which you can specify using `-m` or `--model` parameter of the utility
-* `classname` is the full class name of the model class
-* `params` is the dictionary with all the parameters that we pass to the class when creating the model. Depending on the model, there will probably be your personal credentials here, such as OpenAI API Key.
 
 ### Templates
 
-To carry out some specific tasks, you can define templates in the same config file using `templates` section. Template definition looks like this:
+The `templates` array defines reusable prompt templates:
 
 ```json
 {
-    "name" : "translate",
-    "template" : "Please, translate the text in triple backquotes below into the following language: {param_1}. Here is the text:\n```{}```"
+  "name": "translate",
+  "template": "Please, translate the text in triple backquotes below into the following language: {param_1}. Here is the text:\n```{}```"
 }
 ```
-* `name` is the name of the template that you can pass to `-p` or `--template` parameter.
-* `template` is the template itself. In this template, `{param_1}` through `{param_3}` are replaced by optional command-line parameters `-1` through `-3`, and `{}` is replaced by the user's query.
 
-You can also pass the actual template text to `-p`/`--template` parameter, like in the following example:
+If a template name is not found and the value has no spaces or `{}` placeholder,
+`yogpt` prints a warning and treats it as a literal template.
 
-```bash
-echo Hello, how are you? | yogpt -p "Translate the following text into Chinese: {}" -
-```
+### System messages
 
-Have a look into sample config file for different templates that you can use in your setup.
-
-> If you by mistake make a typo in the system message name when specifying `--template` parameter, this word would be used as verbatim template, which may cause problems. If there are no spaces or `{}` characters in the specified template, and if the name is not found in config, a warning is printed.
-
-### System Messages
-
-Bot system messages are in a way similar to templates. They define overall behavior of LLM. For example, you can use system message to set the tone of the conversation, or to specify task for the model to perform.
-
-System message can be specified on the command-line using `--system "..."` or `-s "..."` switch. You can also use `@filename` syntax to supply the filename, or use system message name to look it up in the config file.
-
-> If you by mistake make a typo in the system message name, this word would be used as verbatim system message, which may cause problems. If there are no spaces in the specified system message, and if the name is not found in config, a warning is printed.
-
-Config section for system messages looks like this:
+The `system_messages` array defines reusable model instructions:
 
 ```json
-"system_messages" : [
-    {
-        "name" : "rude",
-        "message" : "You are extremely rude chatbot that does not want to talk to anyone."
-    }
-]
+{
+  "name": "expert",
+  "message": "You are a careful technical expert. Give precise, practical answers and call out assumptions."
+}
 ```
+
+If a system message name is not found and the value has no spaces, `yogpt`
+prints a warning and treats it as a literal system message.

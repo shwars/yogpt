@@ -8,8 +8,8 @@ with open('README.md') as readme_file:
 setuptools.setup(
     name='yogpt',
     packages=setuptools.find_namespace_packages('.'),
-    version='0.0.2',
-    install_requires=['requests','langchain','g4f'],
+    version='2.0.0',
+    install_requires=['openai'],
     description='Command-line interface for GPT-like LLMs',
     author='Dmitri Soshnikov',
     author_email='dmitri@soshnikov.com',

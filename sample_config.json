@@ -1,40 +1,96 @@
 {
- "models" : [
-   {
-     "name" : "yagpt",
-     "classname" : "langchain.chat_models.ChatYandexGPT",
-     "default" : true,
-     "params" : { "api_key" : "..." }
-   },
-   {
-     "name" : "gc",
-     "classname" : "langchain.chat_models.GigaChat",
-     "params" : { "credentials" : "...", "verify_ssl_certs" : false }
-   },
-   {
-    "name" : "loc",
-    "classname" : "langchain.llms.GPT4All",
-    "params" : { "model" : "d:/data/mistral-7b-openorca.Q4_0.gguf" }
-   }
-  ],
-  "templates" : [
+  "models": [
     {
-      "name" : "translate",
-      "template" : "Please, translate the text in triple backquotes below into the following language: {param_1}. Here is the text:\n```{}```"
+      "name": "gpt",
+      "model_name": "gpt-5.5",
+      "base_url": "https://api.openai.com/v1",
+      "api_key": "%OPENAI_API_KEY%",
+      "default": true,
+      "params": {
+        "reasoning": { "effort": "none" }
+      }
     },
     {
-      "name" : "summarize",
-      "template" : "Please, summarize the text in triple backquotes below:\n```{}```"
+      "name": "fast",
+      "model_name": "gpt-5.4-mini",
+      "base_url": "https://api.openai.com/v1",
+      "api_key": "%OPENAI_API_KEY%",
+      "params": {
+        "reasoning": { "effort": "none" }
+      }
     },
     {
-      "name" : "expand",
-      "template" : "Please, rewrite the text in triple backquotes below in the longest possible form:\n```{}```"
+      "name": "cheap",
+      "model_name": "gpt-5.4-nano",
+      "base_url": "https://api.openai.com/v1",
+      "api_key": "%OPENAI_API_KEY%",
+      "params": {
+        "reasoning": { "effort": "none" }
+      }
+    },
+    {
+      "name": "yagpt",
+      "model_name": "gpt://%folder_id%/yandexgpt-5.1",
+      "base_url": "https://ai.api.cloud.yandex.net/v1",
+      "api_key": "%api_key%",
+      "project": "%folder_id%"
+    },
+    {
+      "name": "yagpt-pro",
+      "model_name": "gpt://%folder_id%/yandexgpt-5-pro",
+      "base_url": "https://ai.api.cloud.yandex.net/v1",
+      "api_key": "%api_key%",
+      "project": "%folder_id%"
+    },
+    {
+      "name": "qwen",
+      "model_name": "gpt://%folder_id%/qwen3.5-35b-a3b-fp8",
+      "base_url": "https://ai.api.cloud.yandex.net/v1",
+      "api_key": "%api_key%",
+      "project": "%folder_id%"
+    },
+    {
+      "name": "deepseek",
+      "model_name": "gpt://%folder_id%/deepseek-v32",
+      "base_url": "https://ai.api.cloud.yandex.net/v1",
+      "api_key": "%api_key%",
+      "project": "%folder_id%"
     }
   ],
-  "system_messages" : [
+  "templates": [
     {
-      "name" : "rude",
-      "message" : "You are extremely rude chatbot that does not want to talk to anyone."
+      "name": "translate",
+      "template": "Please, translate the text in triple backquotes below into the following language: {param_1}. Here is the text:\n```{}```"
+    },
+    {
+      "name": "summarize",
+      "template": "Please, summarize the text in triple backquotes below:\n```{}```"
+    },
+    {
+      "name": "expand",
+      "template": "Please, rewrite the text in triple backquotes below in the longest possible form:\n```{}```"
+    },
+    {
+      "name": "explain-code",
+      "template": "Please explain what the following code does, including important edge cases:\n```{}```"
+    },
+    {
+      "name": "fix-text",
+      "template": "Please rewrite the text below so it is clear, concise, and natural. Preserve the original meaning:\n```{}```"
+    },
+    {
+      "name": "bullets",
+      "template": "Please convert the text below into concise bullet points:\n```{}```"
+    }
+  ],
+  "system_messages": [
+    {
+      "name": "rude",
+      "message": "You are extremely rude chatbot that does not want to talk to anyone."
+    },
+    {
+      "name": "expert",
+      "message": "You are a careful technical expert. Give precise, practical answers and call out assumptions."
     }
   ]
 }
