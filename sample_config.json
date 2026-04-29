@@ -10,6 +10,11 @@
      "name" : "gc",
      "classname" : "langchain.chat_models.GigaChat",
      "params" : { "credentials" : "...", "verify_ssl_certs" : false }
+   },
+   {
+    "name" : "loc",
+    "classname" : "langchain.llms.GPT4All",
+    "params" : { "model" : "d:/data/mistral-7b-openorca.Q4_0.gguf" }
    }
   ],
   "templates" : [

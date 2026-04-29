@@ -59,7 +59,7 @@ def mapfile(fn):
         return fn
 
 class ABot:
-    def __init__(self,base_model,system_message=None):
+    def __init__(self,base_model,system_message=None,is_llm=False):
         self.GPT = base_model
         self.history = [SystemMessage(content=system_message)] if system_message else []
         self.prompt_translator = lambda x : x
